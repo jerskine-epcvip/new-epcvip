@@ -2064,5 +2064,857 @@
   });
 </script>
 <script src="js/signup-modal.js"></script>
+
+<!-- ═══ EPCVIP Chat Widget ═══ -->
+<style id="epcvip-chat-styles">
+  /* ── Reset & scope ─────────────────────────────── */
+  #epcvip-widget * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Toggle button ─────────────────────────────── */
+  #epcvip-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #F5C518;
+    border: none;
+    cursor: pointer;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 28px rgba(245,197,24,0.5), 0 2px 8px rgba(0,0,0,0.4);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+  }
+  #epcvip-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 10px 36px rgba(245,197,24,0.65), 0 4px 12px rgba(0,0,0,0.4);
+  }
+  #epcvip-toggle svg { transition: transform 0.3s ease, opacity 0.3s ease; }
+  #epcvip-toggle .ico-chat { position: absolute; }
+  #epcvip-toggle .ico-close { position: absolute; opacity: 0; transform: rotate(-90deg); }
+  #epcvip-toggle.open .ico-chat { opacity: 0; transform: rotate(90deg); }
+  #epcvip-toggle.open .ico-close { opacity: 1; transform: rotate(0deg); }
+
+  /* ── Unread badge ─────────────────────────────── */
+  #epcvip-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #0a0a0a;
+    animation: epc-pulse-badge 2s infinite;
+    transition: opacity 0.2s;
+  }
+  #epcvip-badge.hidden { opacity: 0; pointer-events: none; }
+  @keyframes epc-pulse-badge {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  /* ── Chat window ───────────────────────────────── */
+  #epcvip-window {
+    position: fixed;
+    bottom: 104px;
+    right: 28px;
+    width: 380px;
+    max-width: calc(100vw - 24px);
+    height: 580px;
+    max-height: calc(100vh - 130px);
+    background: #111111;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9997;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.75), 0 1px 0 rgba(255,255,255,0.05) inset;
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+  }
+  #epcvip-window.open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Top accent line */
+  #epcvip-window::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245,197,24,0.7), rgba(255,224,102,0.4), transparent);
+    z-index: 1;
+  }
+
+  /* ── Header ─────────────────────────────────────── */
+  #epcvip-header {
+    padding: 18px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.02);
+  }
+  #epcvip-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(245,197,24,0.2), rgba(245,197,24,0.05));
+    border: 1px solid rgba(245,197,24,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 900;
+    color: #F5C518;
+    flex-shrink: 0;
+    letter-spacing: -0.02em;
+  }
+  #epcvip-header-info { flex: 1; min-width: 0; }
+  #epcvip-header-name {
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: #F0F0F0;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #epcvip-header-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #4CAF50;
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+  #epcvip-header-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #4CAF50;
+    border-radius: 50%;
+    animation: epc-status-pulse 2.5s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes epc-status-pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  #epcvip-close {
+    width: 30px;
+    height: 30px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 14px;
+    line-height: 1;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  #epcvip-close:hover { background: rgba(255,255,255,0.1); color: #F0F0F0; }
+
+  /* ── Message area ──────────────────────────────── */
+  #epcvip-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+  #epcvip-messages::-webkit-scrollbar { width: 4px; }
+  #epcvip-messages::-webkit-scrollbar-track { background: transparent; }
+  #epcvip-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+  /* Message row */
+  .epc-msg-row { display: flex; align-items: flex-end; gap: 8px; animation: epc-msg-in 0.3s cubic-bezier(0.16,1,0.3,1); }
+  .epc-msg-row.user { flex-direction: row-reverse; }
+  @keyframes epc-msg-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Bot avatar in messages */
+  .epc-msg-avt {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(245,197,24,0.2), rgba(245,197,24,0.05));
+    border: 1px solid rgba(245,197,24,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #F5C518;
+    flex-shrink: 0;
+    letter-spacing: -0.01em;
+  }
+
+  /* Bubble */
+  .epc-bubble {
+    max-width: 78%;
+    padding: 11px 14px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    font-weight: 500;
+    position: relative;
+  }
+  /* Bot bubble */
+  .epc-msg-row.bot .epc-bubble {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    color: #D0D0D0;
+    border-bottom-left-radius: 4px;
+  }
+  /* User bubble */
+  .epc-msg-row.user .epc-bubble {
+    background: #F5C518;
+    color: #0a0a0a;
+    border-bottom-right-radius: 4px;
+    font-weight: 600;
+  }
+  /* Link styling inside bot bubbles */
+  .epc-bubble a { color: #F5C518; font-weight: 700; text-decoration: none; }
+  .epc-bubble a:hover { text-decoration: underline; }
+  /* Topic label */
+  .epc-bubble-topic {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #F5C518;
+    margin-bottom: 5px;
+    opacity: 0.85;
+  }
+
+  /* ── Typing indicator ──────────────────────────── */
+  #epcvip-typing { display: none; }
+  #epcvip-typing.visible { display: flex; }
+  .epc-typing-dots {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+  }
+  .epc-dot {
+    width: 6px;
+    height: 6px;
+    background: rgba(245,197,24,0.6);
+    border-radius: 50%;
+    animation: epc-bounce 1.2s infinite;
+  }
+  .epc-dot:nth-child(2) { animation-delay: 0.15s; }
+  .epc-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes epc-bounce {
+    0%,60%,100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* ── Suggestions ───────────────────────────────── */
+  #epcvip-suggestions {
+    padding: 8px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  #epcvip-suggestions-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A4A4A;
+    margin-bottom: 2px;
+  }
+  .epc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .epc-chip {
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+  .epc-chip:hover {
+    background: rgba(245,197,24,0.08);
+    border-color: rgba(245,197,24,0.3);
+    color: #F5C518;
+  }
+
+  /* ── Input area ────────────────────────────────── */
+  #epcvip-input-bar {
+    padding: 12px 14px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.15);
+  }
+  #epcvip-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: #F0F0F0;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    resize: none;
+    height: 40px;
+    line-height: 1.4;
+  }
+  #epcvip-input::placeholder { color: #4A4A4A; }
+  #epcvip-input:focus {
+    border-color: rgba(245,197,24,0.4);
+    background: rgba(245,197,24,0.03);
+  }
+  #epcvip-send {
+    width: 40px;
+    height: 40px;
+    background: #F5C518;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 3px 12px rgba(245,197,24,0.4);
+  }
+  #epcvip-send:hover { background: #FFE066; transform: scale(1.08); }
+  #epcvip-send:active { transform: scale(0.95); }
+  #epcvip-send:disabled { background: rgba(255,255,255,0.08); box-shadow: none; cursor: not-allowed; transform: none; }
+  #epcvip-send:disabled svg path { stroke: #333; }
+
+  /* ── Footer credit ─────────────────────────────── */
+  #epcvip-footer {
+    text-align: center;
+    padding: 0 14px 10px;
+    font-size: 0.58rem;
+    color: #2A2A2A;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+
+  /* ── Mobile ─────────────────────────────────────── */
+  @media (max-width: 480px) {
+    #epcvip-window {
+      bottom: 0;
+      right: 0;
+      left: 0;
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      max-height: 100%;
+      border-radius: 0;
+      border: none;
+    }
+    #epcvip-toggle {
+      bottom: 20px;
+      right: 20px;
+    }
+  }
+</style>
+
+<div id="epcvip-widget">
+
+  <!-- Toggle Button -->
+  <button id="epcvip-toggle" aria-label="Chat with EPCVIP">
+    <span id="epcvip-badge" aria-hidden="true">1</span>
+    <!-- Chat icon -->
+    <svg class="ico-chat" width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <path d="M13 3C7.477 3 3 7.03 3 12c0 1.82.527 3.52 1.438 4.973L3 22l5.25-1.328A10.3 10.3 0 0013 21c5.523 0 10-4.03 10-9s-4.477-9-10-9z" stroke="#0a0a0a" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="9" cy="12" r="1.2" fill="#0a0a0a"/>
+      <circle cx="13" cy="12" r="1.2" fill="#0a0a0a"/>
+      <circle cx="17" cy="12" r="1.2" fill="#0a0a0a"/>
+    </svg>
+    <!-- Close icon -->
+    <svg class="ico-close" width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M3 3l12 12M15 3L3 15" stroke="#0a0a0a" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Chat Window -->
+  <div id="epcvip-window" role="dialog" aria-label="EPCVIP Chat Assistant">
+
+    <!-- Header -->
+    <div id="epcvip-header">
+      <div id="epcvip-avatar">EV</div>
+      <div id="epcvip-header-info">
+        <div id="epcvip-header-name">EPCVIP Assistant</div>
+        <div id="epcvip-header-status">Online now</div>
+      </div>
+      <button id="epcvip-close" aria-label="Close chat">✕</button>
+    </div>
+
+    <!-- Messages -->
+    <div id="epcvip-messages" aria-live="polite">
+      <!-- Greeting injected by JS -->
+    </div>
+
+    <!-- Typing indicator -->
+    <div id="epcvip-typing" class="epc-msg-row bot" style="padding: 0 16px 8px;">
+      <div class="epc-msg-avt">EV</div>
+      <div class="epc-typing-dots">
+        <span class="epc-dot"></span>
+        <span class="epc-dot"></span>
+        <span class="epc-dot"></span>
+      </div>
+    </div>
+
+    <!-- Suggested questions -->
+    <div id="epcvip-suggestions">
+      <div id="epcvip-suggestions-label">Suggested questions</div>
+      <div class="epc-chips" id="epcvip-chips"></div>
+    </div>
+
+    <!-- Input bar -->
+    <div id="epcvip-input-bar">
+      <input
+        id="epcvip-input"
+        type="text"
+        placeholder="Ask about publishers, leads, EPCs…"
+        maxlength="300"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Type your question"
+      />
+      <button id="epcvip-send" aria-label="Send message" disabled>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M15 9H3M15 9L9.5 3.5M15 9L9.5 14.5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div id="epcvip-footer">Powered by EPCVIP • Keyword-matched responses</div>
+
+  </div><!-- /window -->
+</div><!-- /widget -->
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── KNOWLEDGE BASE ──────────────────────────────────────────────────
+     Extracted and organized from: index.html, publishers.html,
+     advertisers.html, about.html, signup.html
+  ─────────────────────────────────────────────────────────────────── */
+  const KB = [
+    {
+      id: 'about',
+      triggers: ['who','what','epcvip','company','about','founded','history','story','where','located',
+                 'calabasas','technology','different','mission','overview','background','is epcvip',
+                 'what is','tell me about','learn about'],
+      title: 'About EPCVIP',
+      answer: 'EPCVIP is a <strong>technology company</strong> founded in 2014 in Calabasas, CA. We\'re not a traditional marketing agency — we use proprietary software to power the most advanced lead generation operation in financial services. We\'re the <strong>#1 direct publishing lead provider in FinTech</strong>, with 74+ experts operating across 4 continents. Named Top Vendor by CFO Tech Outlook and Financial Services Review. Our platform has been refined for over a decade and generates <strong>50,000+ quality leads daily</strong>.',
+      follow: ['Who founded EPCVIP?', 'What makes EPCVIP different?', 'How do I join the network?']
+    },
+    {
+      id: 'founder',
+      triggers: ['founder','ceo','valeriy','zeltser','founded by','who started','who built','creator',
+                 'leadership','team','executive','management','who runs','eric wex','john lambert',
+                 'garrett','sonia lent','staff','employees','people'],
+      title: 'Leadership Team',
+      answer: 'EPCVIP was founded by <strong>Valeriy Zeltser</strong>, who personally built V1.0 of the platform. With a background in economics, mathematics, and risk management, he\'s a YPO member who also personally trained the in-house media buying team. The full leadership team: <strong>Eric Wex</strong> (Chief Strategy Officer), <strong>John Lambert</strong> (CTO), <strong>Garrett Axelrod</strong> (CCO), and <strong>Sonia Lent</strong> (SVP Business Development) — backed by 74+ specialists across 4 continents.',
+      follow: ['When was EPCVIP founded?', 'What is the company\'s mission?', 'How do I join the network?']
+    },
+    {
+      id: 'publishers',
+      triggers: ['publisher','publish','affiliate','join as publisher','become publisher','send traffic',
+                 'how much can i earn','how do publishers','publisher program','publisher benefits',
+                 'publisher network','publisher signup'],
+      title: 'For Publishers',
+      answer: 'EPCVIP is the <strong>#1 affiliate program in financial lead generation</strong>. Publishers earn an average of <strong>$4.87 per click</strong> — more than double the industry average of $2.10. Key benefits:\n• Industry-leading EPCs across all major financial verticals\n• Real-time dashboard with granular click and revenue analytics\n• Reliable <strong>on-time weekly payments</strong> via ACH, wire, or check\n• Dedicated account manager with fast-response support\n• Approval within <strong>48 hours</strong> of applying\n\nOur intelligent routing engine ensures your clicks always land with the highest-paying advertiser automatically.',
+      follow: ['What are the EPC rates by vertical?', 'How do payments work?', 'How do I apply as a publisher?']
+    },
+    {
+      id: 'epc',
+      triggers: ['epc','earnings per click','average epc','avg epc','how much per click','payout rate',
+                 'click value','what do i earn','how much earn','make per click','epc rate','epc rates',
+                 '$4','$6','$5','per click'],
+      title: 'EPC Rates',
+      answer: 'EPCVIP publishers earn an average of <strong>$4.87 per click</strong> — vs. the industry average of $2.10. Earnings by vertical:\n• Personal Loans: <strong>$6.20</strong>\n• Auto Finance: <strong>$5.40</strong>\n• Debt Relief: <strong>$4.80</strong>\n• Credit Cards: <strong>$3.90</strong>\n\nOur proprietary routing engine automatically directs every click to the highest-paying advertiser in real time, maximizing your earnings on every send.',
+      follow: ['How do I become a publisher?', 'How do payments work?', 'What verticals are available?']
+    },
+    {
+      id: 'advertisers',
+      triggers: ['advertiser','advertise','buy leads','purchase leads','get leads','lead buyer','demand',
+                 'advertiser program','advertiser benefits','become advertiser','how to buy',
+                 'advertiser network','campaign','i want leads'],
+      title: 'For Advertisers',
+      answer: 'EPCVIP delivers <strong>50,000+ high-intent, verified consumer leads daily</strong> across all major financial verticals. What advertisers get:\n• Consumers actively seeking financial products\n• Multi-layer quality control — fraud detection, duplicate screening, intent validation\n• Full <strong>TCPA compliance</strong> with complete audit trails\n• Intelligent targeting and data segmentation by credit profile, intent, and geo\n• Real-time analytics with sub-second dashboard refresh\n• Flexible delivery: <strong>API integration, direct post, or batch</strong>\n• Pricing models: CPA, CPL, or revenue share\n\nWe own every part of the process — no middlemen.',
+      follow: ['What verticals do you cover?', 'How are leads verified?', 'What pricing models are available?']
+    },
+    {
+      id: 'verticals',
+      triggers: ['vertical','verticals','niche','niches','what verticals','financial vertical',
+                 'personal loan','auto finance','auto loan','debt relief','debt consolidation',
+                 'credit card','mortgage','insurance','business loan','student loan','tax relief',
+                 'banking','installment','merchant processing','credit monitoring','what products'],
+      title: 'Financial Verticals',
+      answer: 'EPCVIP covers the full spectrum of consumer financial services. Lead verticals include:\n• Personal Loans <em>(highest volume)</em>\n• Auto Finance\n• Debt Consolidation / Debt Relief <em>(high intent)</em>\n• Business Loans\n• Installment Loans\n• Auto Insurance\n• Credit Monitoring\n• Merchant Processing\n• Mortgage\n• Credit Cards\n• Student Loans\n• Tax Relief\n• Banking\n\nWe generate 50,000+ leads daily spanning all of these verticals.',
+      follow: ['What are the EPC rates by vertical?', 'How do advertisers buy leads?', 'How many leads are generated daily?']
+    },
+    {
+      id: 'payments',
+      triggers: ['payment','pay','paid','how paid','when paid','schedule','weekly payment','wire','ach',
+                 'check','payout schedule','payment method','get paid','payment frequency','how often paid',
+                 'payment terms','net terms'],
+      title: 'Publisher Payments',
+      answer: 'EPCVIP offers <strong>reliable, on-time weekly payments</strong> to publishers — no waiting 30 or 60 days for your earnings. Accepted payment methods:\n• <strong>ACH</strong> (direct bank transfer)\n• <strong>Wire transfer</strong>\n• <strong>Check</strong>\n\nYour dedicated account manager will set up your preferred payment method during onboarding. Payment schedules are flexible based on your preferences.',
+      follow: ['How do I join as a publisher?', 'What EPC rates can I earn?', 'How do I get started?']
+    },
+    {
+      id: 'technology',
+      triggers: ['technology','tech','platform','algorithm','machine learning','ml','optimization',
+                 'analytics','dashboard','data','tracking','real time','realtime','routing','engine',
+                 'proprietary','software','how does it work','how it works','uptime','infrastructure'],
+      title: 'Platform Technology',
+      answer: 'EPCVIP\'s proprietary optimization platform was built entirely in-house and refined over a decade. Key capabilities:\n• <strong>Intelligent routing engine</strong> — directs every click to the highest-paying advertiser automatically\n• <strong>Real-time dashboards</strong> with sub-second data refresh\n• <strong>ML-powered optimization</strong> — continuously improves targeting precision and performance\n• <strong>Multi-layer quality controls</strong> — duplicate screening, fraud detection, intent validation\n• <strong>99.9% guaranteed uptime</strong>\n• API, direct post, and batch delivery options\n\nVersion 1.0 delivered 25%+ conversion increases for early clients from day one.',
+      follow: ['What analytics do publishers get?', 'How does lead quality control work?', 'What is the platform uptime?']
+    },
+    {
+      id: 'quality',
+      triggers: ['quality','quality control','verified','verification','fraud','duplicate','filter',
+                 'how are leads verified','lead quality','fake leads','validate','validation',
+                 'clean leads','scrub','bad leads'],
+      title: 'Lead Quality Control',
+      answer: 'Every lead in the EPCVIP pipeline passes through <strong>multi-layer quality controls</strong> before reaching any campaign:\n• <strong>Duplicate screening</strong> — removes repeat submissions\n• <strong>Fraud detection</strong> — flags suspicious activity patterns\n• <strong>Intent validation</strong> — confirms consumers are genuinely seeking products\n• <strong>TCPA compliance verification</strong> — full audit trails on every lead\n• Bank-grade encryption protecting all data in transit and at rest\n\nWe own the full process end-to-end — no third-party networks or brokers passing unverified leads.',
+      follow: ['What is TCPA compliance?', 'What verticals are available?', 'How do I become an advertiser?']
+    },
+    {
+      id: 'compliance',
+      triggers: ['tcpa','compliance','compliant','legal','privacy','data security','encryption',
+                 'soc 2','soc2','audit','ccpa','gdpr','safe','security','secure','regulation',
+                 'data protection','hipaa'],
+      title: 'Compliance & Security',
+      answer: 'EPCVIP takes compliance and security very seriously:\n• <strong>Full TCPA compliance</strong> with complete audit trails on every lead\n• <strong>Bank-grade encryption</strong> for all data in transit and at rest\n• <strong>SOC 2 compliance posture</strong> maintained\n• <strong>Regular penetration testing</strong> of all systems\n• CCPA request processing available via our legal page\n• Every lead is traceable from acquisition to delivery\n\nBoth your legal team and your performance team will be satisfied.',
+      follow: ['How are leads quality-checked?', 'How is consumer data protected?', 'How do I become an advertiser?']
+    },
+    {
+      id: 'signup',
+      triggers: ['sign up','signup','register','apply','join','get started','create account',
+                 'how to join','how do i join','application','onboard','approval','approved',
+                 '48 hours','start','begin','open account','new account'],
+      title: 'Getting Started',
+      answer: 'Getting started with EPCVIP is straightforward:\n<strong>1.</strong> Click <a href="signup.html"><strong>"Get Started"</strong></a> in the top navigation\n<strong>2.</strong> Select whether you\'re a <strong>Publisher</strong> or <strong>Advertiser</strong>\n<strong>3.</strong> Complete the application form\n<strong>4.</strong> Our team reviews your application within <strong>48 hours</strong>\n<strong>5.</strong> Upon approval, you\'ll be assigned a dedicated account manager\n\nFor advertisers with custom campaign requirements, reach out directly via the Contact section on the homepage.',
+      follow: ['What do publishers earn?', 'What leads are available for advertisers?', 'What is the approval process?']
+    },
+    {
+      id: 'stats',
+      triggers: ['stats','statistics','numbers','how many','how big','size','scale','volume',
+                 'leads per day','daily leads','how many publishers','how many advertisers',
+                 '50000','50 000','500 publishers','uptime percentage','track record','proven'],
+      title: 'Key Stats',
+      answer: 'EPCVIP by the numbers:\n• <strong>50,000+</strong> quality leads generated daily\n• <strong>500+</strong> active publishers & advertisers on the network\n• <strong>99.9%</strong> guaranteed platform uptime\n• <strong>#1</strong> EPC network in FinTech\n• <strong>74+</strong> experts across 4 continents\n• Founded in <strong>2014</strong> — over a decade of operation\n• Named <strong>Top Vendor</strong> by CFO Tech Outlook & Financial Services Review',
+      follow: ['What are the EPC rates?', 'How do I become a publisher?', 'What financial verticals are available?']
+    },
+    {
+      id: 'pricing',
+      triggers: ['pricing','price','cost','cpa','cpl','revenue share','pay per','fee','rate','model',
+                 'how much does it cost','how much do advertisers pay','what does it cost',
+                 'advertising cost','lead cost','per lead'],
+      title: 'Pricing Models',
+      answer: 'EPCVIP offers <strong>flexible pricing models for advertisers</strong>:\n• <strong>CPA</strong> — Cost Per Acquisition\n• <strong>CPL</strong> — Cost Per Lead\n• <strong>Revenue Share</strong> — percentage of generated revenue\n\nFor publishers, you earn on a per-click basis with an average EPC of <strong>$4.87</strong> (no setup fees). Specific pricing for advertiser campaigns depends on vertical, volume, and targeting requirements — contact our team to discuss your campaign goals.',
+      follow: ['How do advertisers get started?', 'What verticals are available?', 'What EPC rates do publishers earn?']
+    },
+    {
+      id: 'contact',
+      triggers: ['contact','reach out','phone','email','talk','speak','support','help','get in touch',
+                 'office','address','sales team','account manager','reach','how to contact',
+                 'customer service','assistance','events','affiliate summit','lend360','leadscon'],
+      title: 'Contact & Support',
+      answer: 'To connect with EPCVIP:\n• <strong>Apply / Get Started:</strong> <a href="signup.html">signup.html</a> — our team reviews within 48 hours\n• <strong>Contact section:</strong> <a href="index.html#contact">Homepage Contact</a>\n• Once you\'re on the network, you\'ll have a <strong>dedicated account manager</strong> for fast-response support\n• We\'re active at industry events: <strong>Affiliate Summit, Lend360, and LeadsCon</strong>\n• Premier Partner on <strong>LendSuite</strong>',
+      follow: ['How do I sign up?', 'What is the approval timeline?', 'Do I get a dedicated account manager?']
+    }
+  ];
+
+  /* Initial suggested questions shown before any conversation */
+  const INITIAL_SUGGESTIONS = [
+    'What is EPCVIP?',
+    'How much do publishers earn?',
+    'How do I buy leads?',
+    'What verticals do you cover?',
+    'How do I get started?'
+  ];
+
+  /* Fallback message when no topic matches */
+  const FALLBACK = "I can help with questions about EPCVIP's publisher program, advertiser leads, EPC rates, verticals, technology, compliance, or how to join. Try asking something like \"What are your EPC rates?\" or \"How do I sign up as a publisher?\"";
+
+  /* ── MATCHING ENGINE ──────────────────────────────────────────────── */
+  function normalize(str) {
+    return str.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function findBestMatch(query) {
+    const q = normalize(query);
+    const words = q.split(' ').filter(w => w.length > 2);
+    if (!words.length) return null;
+
+    let best = null, bestScore = 0;
+
+    for (const topic of KB) {
+      let score = 0;
+
+      /* Multi-word phrase match (highest priority) */
+      for (const trigger of topic.triggers) {
+        if (trigger.includes(' ') && q.includes(trigger)) {
+          score += 8;
+        }
+      }
+
+      /* Word-level matching */
+      for (const word of words) {
+        for (const trigger of topic.triggers) {
+          if (trigger === word) {
+            score += 3; /* exact word match */
+          } else if (trigger.length > 3 && trigger.includes(word)) {
+            score += 1; /* word is substring of trigger */
+          } else if (word.length > 4 && word.includes(trigger)) {
+            score += 1; /* trigger is substring of query word */
+          }
+        }
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        best = topic;
+      }
+    }
+
+    /* Require at least a score of 2 to avoid false positives */
+    return bestScore >= 2 ? best : null;
+  }
+
+  /* ── DOM REFS ─────────────────────────────────────────────────────── */
+  const toggle      = document.getElementById('epcvip-toggle');
+  const win         = document.getElementById('epcvip-window');
+  const closeBtn    = document.getElementById('epcvip-close');
+  const messages    = document.getElementById('epcvip-messages');
+  const typingEl    = document.getElementById('epcvip-typing');
+  const suggestBox  = document.getElementById('epcvip-suggestions');
+  const chipsEl     = document.getElementById('epcvip-chips');
+  const input       = document.getElementById('epcvip-input');
+  const sendBtn     = document.getElementById('epcvip-send');
+  const badge       = document.getElementById('epcvip-badge');
+
+  let isOpen = false;
+  let hasGreeted = false;
+
+  /* ── OPEN / CLOSE ─────────────────────────────────────────────────── */
+  function openChat() {
+    isOpen = true;
+    win.classList.add('open');
+    toggle.classList.add('open');
+    badge.classList.add('hidden');
+    if (!hasGreeted) {
+      hasGreeted = true;
+      setTimeout(showGreeting, 200);
+    } else {
+      input.focus();
+    }
+  }
+
+  function closeChat() {
+    isOpen = false;
+    win.classList.remove('open');
+    toggle.classList.remove('open');
+  }
+
+  toggle.addEventListener('click', () => isOpen ? closeChat() : openChat());
+  closeBtn.addEventListener('click', closeChat);
+
+  /* Close on Escape */
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeChat(); });
+
+  /* ── GREETING ─────────────────────────────────────────────────────── */
+  function showGreeting() {
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      appendBot(
+        'Welcome to EPCVIP',
+        'Hi! I\'m the EPCVIP assistant. I can answer questions about our <strong>publisher program</strong>, <strong>advertiser leads</strong>, EPC rates, technology, compliance, and how to join the network.\n\nWhat would you like to know?'
+      );
+      setChips(INITIAL_SUGGESTIONS);
+      setTimeout(() => input.focus(), 100);
+    }, 900);
+  }
+
+  /* ── MESSAGES ─────────────────────────────────────────────────────── */
+  function appendBot(topic, html) {
+    const row = document.createElement('div');
+    row.className = 'epc-msg-row bot';
+
+    const avt = document.createElement('div');
+    avt.className = 'epc-msg-avt';
+    avt.textContent = 'EV';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'epc-bubble';
+
+    if (topic) {
+      const label = document.createElement('div');
+      label.className = 'epc-bubble-topic';
+      label.textContent = topic;
+      bubble.appendChild(label);
+    }
+
+    /* Convert plain newlines to <br> */
+    const bodyHtml = html.replace(/\n/g, '<br>');
+    const body = document.createElement('div');
+    body.innerHTML = bodyHtml;
+    bubble.appendChild(body);
+
+    row.appendChild(avt);
+    row.appendChild(bubble);
+    messages.appendChild(row);
+    scrollBottom();
+  }
+
+  function appendUser(text) {
+    const row = document.createElement('div');
+    row.className = 'epc-msg-row user';
+    const bubble = document.createElement('div');
+    bubble.className = 'epc-bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    messages.appendChild(row);
+    scrollBottom();
+  }
+
+  function scrollBottom() {
+    requestAnimationFrame(() => {
+      messages.scrollTop = messages.scrollHeight;
+    });
+  }
+
+  /* ── TYPING INDICATOR ─────────────────────────────────────────────── */
+  function showTyping() {
+    typingEl.classList.add('visible');
+    scrollBottom();
+  }
+
+  function hideTyping() {
+    typingEl.classList.remove('visible');
+  }
+
+  /* ── SUGGESTIONS / CHIPS ──────────────────────────────────────────── */
+  function setChips(questions) {
+    chipsEl.innerHTML = '';
+    suggestBox.style.display = questions.length ? '' : 'none';
+    questions.forEach(q => {
+      const chip = document.createElement('button');
+      chip.className = 'epc-chip';
+      chip.textContent = q;
+      chip.addEventListener('click', () => handleSend(q));
+      chipsEl.appendChild(chip);
+    });
+  }
+
+  /* ── SEND / RESPOND ───────────────────────────────────────────────── */
+  function handleSend(text) {
+    const q = (text || input.value).trim();
+    if (!q) return;
+
+    /* Reset input */
+    input.value = '';
+    sendBtn.disabled = true;
+    setChips([]); /* clear suggestions while thinking */
+
+    appendUser(q);
+    showTyping();
+
+    /* Simulate natural response delay (600-1200ms based on answer length) */
+    const match = findBestMatch(q);
+    const delay = match ? Math.min(600 + match.answer.length * 0.6, 1400) : 800;
+
+    setTimeout(() => {
+      hideTyping();
+      if (match) {
+        appendBot(match.title, match.answer);
+        setChips(match.follow || []);
+      } else {
+        appendBot('Not sure about that', FALLBACK);
+        setChips(INITIAL_SUGGESTIONS);
+      }
+      input.focus();
+    }, delay);
+  }
+
+  /* ── INPUT EVENTS ─────────────────────────────────────────────────── */
+  input.addEventListener('input', () => {
+    sendBtn.disabled = input.value.trim().length === 0;
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && input.value.trim()) {
+      e.preventDefault();
+      handleSend();
+    }
+  });
+
+  sendBtn.addEventListener('click', () => handleSend());
+
+  /* ── AUTO-OPEN AFTER DELAY (optional: remove if unwanted) ─────────── */
+  /* Uncomment the lines below to auto-open the chat after 8 seconds:
+  setTimeout(() => {
+    if (!isOpen) openChat();
+  }, 8000);
+  */
+
+})();
+</script>
 </body>
 </html>
