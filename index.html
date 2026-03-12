@@ -569,25 +569,33 @@
       background: linear-gradient(90deg, transparent, rgba(245,197,24,0.5), transparent);
     }
 
-    .pub-epc-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; }
-    .pub-epc-val {
-      font-size: 3.5rem; font-weight: 900; letter-spacing: -0.05em; line-height: 1;
-      background: var(--grad-yellow);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.25rem;
-    }
-    .pub-epc-sub { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .pub-epc-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1.25rem; }
 
-    .epc-rows { display: flex; flex-direction: column; gap: 10px; }
-    .epc-row { display: flex; align-items: center; gap: 10px; }
-    .epc-row-lbl { font-size: 0.72rem; color: var(--text-muted); width: 75px; flex-shrink: 0; }
-    .epc-track { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 9px; overflow: hidden; }
-    .epc-fill { height: 100%; border-radius: 9px; }
-    .fill-y  { background: linear-gradient(90deg, var(--accent-dark), var(--accent-light)); }
-    .fill-yd { background: linear-gradient(90deg, #8a6c00, var(--accent)); }
-    .fill-g  { background: rgba(255,255,255,0.12); }
-    .epc-row-val { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); width: 34px; text-align: right; }
+    /* ── Donut chart ── */
+    .donut-wrap { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+    .donut-chart {
+      width: 200px; height: 200px;
+      filter: drop-shadow(0 0 18px rgba(245,197,24,0.18));
+      overflow: visible;
+    }
+    .donut-seg { stroke-dasharray: 0 503; }
+
+    @keyframes ds1 { to { stroke-dasharray: 149 503; } }
+    @keyframes ds2 { to { stroke-dasharray: 129 503; } }
+    @keyframes ds3 { to { stroke-dasharray: 115 503; } }
+    @keyframes ds4 { to { stroke-dasharray:  94 503; } }
+
+    .donut-chart.animated .seg-1 { animation: ds1 0.65s cubic-bezier(0.4,0,0.2,1) 0.10s both; }
+    .donut-chart.animated .seg-2 { animation: ds2 0.65s cubic-bezier(0.4,0,0.2,1) 0.24s both; }
+    .donut-chart.animated .seg-3 { animation: ds3 0.65s cubic-bezier(0.4,0,0.2,1) 0.38s both; }
+    .donut-chart.animated .seg-4 { animation: ds4 0.65s cubic-bezier(0.4,0,0.2,1) 0.52s both; }
+
+    /* ── Donut legend ── */
+    .donut-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    .dl-item { display: flex; align-items: center; gap: 8px; }
+    .dl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dl-lbl { font-size: 0.72rem; color: var(--text-muted); flex: 1; }
+    .dl-val { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); }
 
     /* Advertiser visual — table card */
     .adv-card {
@@ -1531,35 +1539,66 @@
       <!-- Visual -->
       <div class="fade-up">
         <div class="pub-card">
-          <div class="pub-epc-label">Your avg. earnings per click</div>
-          <div class="pub-epc-val">$4.87</div>
-          <div class="pub-epc-sub">vs. industry average of $2.10</div>
+          <div class="pub-epc-label">Earnings Per Click by Vertical</div>
 
-          <div class="epc-rows">
-            <div class="epc-row">
-              <span class="epc-row-lbl">Personal Loan</span>
-              <div class="epc-track"><div class="epc-fill fill-y" style="width:92%"></div></div>
-              <span class="epc-row-val">$6.20</span>
+          <div class="donut-wrap">
+            <svg class="donut-chart" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <!-- Background ring -->
+              <circle cx="100" cy="100" r="80" fill="none"
+                      stroke="rgba(255,255,255,0.05)" stroke-width="22"/>
+              <!-- Seg 1: Personal Loan — starts at 12 o'clock, length 149 -->
+              <circle class="donut-seg seg-1" cx="100" cy="100" r="80" fill="none"
+                      stroke="#F5C518" stroke-width="22"
+                      stroke-dasharray="0 503" stroke-dashoffset="0"
+                      transform="rotate(-90 100 100)"/>
+              <!-- Seg 2: Auto Finance — offset 153 (149 + 4 gap) -->
+              <circle class="donut-seg seg-2" cx="100" cy="100" r="80" fill="none"
+                      stroke="#F5A623" stroke-width="22"
+                      stroke-dasharray="0 503" stroke-dashoffset="-153"
+                      transform="rotate(-90 100 100)"/>
+              <!-- Seg 3: Debt Relief — offset 286 (153 + 129 + 4 gap) -->
+              <circle class="donut-seg seg-3" cx="100" cy="100" r="80" fill="none"
+                      stroke="#E88A00" stroke-width="22"
+                      stroke-dasharray="0 503" stroke-dashoffset="-286"
+                      transform="rotate(-90 100 100)"/>
+              <!-- Seg 4: Credit Card — offset 405 (286 + 115 + 4 gap) -->
+              <circle class="donut-seg seg-4" cx="100" cy="100" r="80" fill="none"
+                      stroke="#C46E00" stroke-width="22"
+                      stroke-dasharray="0 503" stroke-dashoffset="-405"
+                      transform="rotate(-90 100 100)"/>
+              <!-- Center labels (not rotated — SVG circles use transform, not the SVG itself) -->
+              <text x="100" y="88" text-anchor="middle"
+                    fill="rgba(255,255,255,0.4)" font-size="9"
+                    font-family="system-ui,sans-serif" font-weight="700" letter-spacing="2">AVG EPC</text>
+              <text class="donut-center-val" x="100" y="114" text-anchor="middle"
+                    fill="#F5C518" font-size="30" font-weight="900"
+                    font-family="system-ui,sans-serif">$0.00</text>
+              <text x="100" y="130" text-anchor="middle"
+                    fill="rgba(255,255,255,0.3)" font-size="8"
+                    font-family="system-ui,sans-serif">vs $2.10 industry avg</text>
+            </svg>
+          </div>
+
+          <div class="donut-legend">
+            <div class="dl-item">
+              <span class="dl-dot" style="background:#F5C518"></span>
+              <span class="dl-lbl">Personal Loan</span>
+              <span class="dl-val">$6.20</span>
             </div>
-            <div class="epc-row">
-              <span class="epc-row-lbl">Auto Finance</span>
-              <div class="epc-track"><div class="epc-fill fill-y" style="width:78%"></div></div>
-              <span class="epc-row-val">$5.40</span>
+            <div class="dl-item">
+              <span class="dl-dot" style="background:#F5A623"></span>
+              <span class="dl-lbl">Auto Finance</span>
+              <span class="dl-val">$5.40</span>
             </div>
-            <div class="epc-row">
-              <span class="epc-row-lbl">Debt Relief</span>
-              <div class="epc-track"><div class="epc-fill fill-yd" style="width:65%"></div></div>
-              <span class="epc-row-val">$4.80</span>
+            <div class="dl-item">
+              <span class="dl-dot" style="background:#E88A00"></span>
+              <span class="dl-lbl">Debt Relief</span>
+              <span class="dl-val">$4.80</span>
             </div>
-            <div class="epc-row">
-              <span class="epc-row-lbl">Credit Card</span>
-              <div class="epc-track"><div class="epc-fill fill-yd" style="width:55%"></div></div>
-              <span class="epc-row-val">$3.90</span>
-            </div>
-            <div class="epc-row">
-              <span class="epc-row-lbl">Industry Avg</span>
-              <div class="epc-track"><div class="epc-fill fill-g" style="width:29%"></div></div>
-              <span class="epc-row-val">$2.10</span>
+            <div class="dl-item">
+              <span class="dl-dot" style="background:#C46E00"></span>
+              <span class="dl-lbl">Credit Card</span>
+              <span class="dl-val">$3.90</span>
             </div>
           </div>
         </div>
@@ -1982,6 +2021,30 @@
     });
   }, { threshold: 0.5 });
   document.querySelectorAll('.count-up').forEach(el => cObserver.observe(el));
+
+  // ─── Donut chart animation ───────────────────
+  const donutChart = document.querySelector('.donut-chart');
+  const donutVal   = document.querySelector('.donut-center-val');
+  if (donutChart && donutVal) {
+    const donutObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          donutChart.classList.add('animated');
+          // Decimal count-up: $0.00 → $4.87
+          const target = 4.87, duration = 1300, start = performance.now();
+          function tick(now) {
+            const p = Math.min((now - start) / duration, 1);
+            const ease = 1 - Math.pow(1 - p, 3);
+            donutVal.textContent = '$' + (target * ease).toFixed(2);
+            if (p < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+          donutObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    donutObserver.observe(donutChart);
+  }
 
   // ─── Smooth anchor scroll ────────────────────
   document.querySelectorAll('a[href^="#"]').forEach(a => {
