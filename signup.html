@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — EPCVIP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================
+       DESIGN SYSTEM
+    ============================================ */
+    :root {
+      --bg:            #0a0a0a;
+      --bg-card:       #141414;
+      --bg-input:      rgba(255,255,255,0.05);
+      --bg-input-focus:rgba(245,197,24,0.05);
+      --border:        rgba(255,255,255,0.09);
+      --border-focus:  rgba(245,197,24,0.5);
+      --border-error:  rgba(239,68,68,0.6);
+
+      --accent:        #F5C518;
+      --accent-light:  #FFE066;
+      --accent-dark:   #C9A012;
+      --accent-glow:   rgba(245,197,24,0.18);
+
+      --text-primary:   #F0F0F0;
+      --text-secondary: #888888;
+      --text-muted:     #4A4A4A;
+      --text-error:     #ef4444;
+
+      --font: 'Montserrat', system-ui, sans-serif;
+
+      --radius-sm:   8px;
+      --radius-md:   12px;
+      --radius-lg:   18px;
+      --radius-xl:   24px;
+      --radius-full: 999px;
+
+      --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Noise */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: 0.35;
+    }
+
+    /* Ambient glow */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 700px; height: 700px;
+      top: -200px; right: -200px;
+      background: radial-gradient(circle, rgba(245,197,24,0.07) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ============================================
+       NAVBAR
+    ============================================ */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 2.5rem;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .navbar-inner {
+      max-width: 1180px; margin: 0 auto;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { text-decoration: none; display: flex; align-items: center; }
+    .logo img { height: 32px; }
+    .nav-back {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--text-primary); }
+    .nav-back svg { transition: transform 0.2s; }
+    .nav-back:hover svg { transform: translateX(-3px); }
+
+    /* ============================================
+       PAGE LAYOUT
+    ============================================ */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 100px 1.5rem 4rem;
+    }
+
+    /* ============================================
+       PROGRESS BAR
+    ============================================ */
+    .progress-wrap {
+      width: 100%; max-width: 680px;
+      margin-bottom: 2.5rem;
+    }
+
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .step-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: default;
+    }
+    .step-bubble {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 800;
+      color: var(--text-muted);
+      transition: all 0.4s var(--ease-out);
+      position: relative; z-index: 1;
+    }
+    .step-label.active .step-bubble {
+      border-color: var(--accent);
+      background: rgba(245,197,24,0.12);
+      color: var(--accent);
+      box-shadow: 0 0 20px rgba(245,197,24,0.2);
+    }
+    .step-label.done .step-bubble {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #0a0a0a;
+    }
+    .step-label.done .step-bubble::after {
+      content: '';
+      position: absolute;
+      width: 10px; height: 6px;
+      border-left: 2px solid #0a0a0a;
+      border-bottom: 2px solid #0a0a0a;
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+    .step-label.done .step-num { display: none; }
+    .step-name {
+      font-size: 0.62rem; font-weight: 600;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color 0.3s;
+      white-space: nowrap;
+    }
+    .step-label.active .step-name { color: var(--accent); }
+    .step-label.done .step-name { color: var(--text-secondary); }
+
+    .progress-track {
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      position: relative;
+      margin-top: -1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-dark), var(--accent-light));
+      border-radius: var(--radius-full);
+      transition: width 0.6s var(--ease-out);
+      box-shadow: 0 0 10px rgba(245,197,24,0.4);
+    }
+
+    /* ============================================
+       FORM CARD
+    ============================================ */
+    .form-card {
+      width: 100%; max-width: 680px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05) inset;
+      position: relative;
+    }
+    .form-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245,197,24,0.6), transparent);
+    }
+
+    /* ============================================
+       STEP PANELS
+    ============================================ */
+    .steps-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-panel {
+      display: none;
+      padding: 2.5rem;
+      animation-duration: 0.45s;
+      animation-timing-function: var(--ease-out);
+      animation-fill-mode: both;
+    }
+    .step-panel.active { display: block; }
+
+    @keyframes slideInFromRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInFromLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOutToLeft {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-40px); }
+    }
+    @keyframes slideOutToRight {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(40px); }
+    }
+
+    .step-panel.enter-right { animation-name: slideInFromRight; }
+    .step-panel.enter-left  { animation-name: slideInFromLeft; }
+
+    .step-header { margin-bottom: 2rem; }
+    .step-tag {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.5rem;
+    }
+    .step-title {
+      font-size: 1.6rem; font-weight: 900;
+      letter-spacing: -0.03em; line-height: 1.15;
+      color: var(--text-primary); margin-bottom: 0.4rem;
+    }
+    .step-title span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 60%, #fff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .step-subtitle {
+      font-size: 0.85rem; font-weight: 400;
+      color: var(--text-secondary); line-height: 1.6;
+    }
+
+    /* ============================================
+       FORM FIELDS
+    ============================================ */
+    .field-grid {
+      display: grid;
+      gap: 1.1rem;
+    }
+    .col-2 { grid-template-columns: 1fr 1fr; }
+    .col-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field.span-2 { grid-column: span 2; }
+
+    .field-label {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .field-label .req { color: var(--accent); }
+
+    .field-input, .field-select {
+      width: 100%; padding: 12px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 0.875rem; font-weight: 500;
+      outline: none;
+      transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+      appearance: none;
+    }
+    .field-input::placeholder { color: var(--text-muted); font-weight: 400; }
+    .field-input:focus, .field-select:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-input-focus);
+      box-shadow: 0 0 0 3px rgba(245,197,24,0.1);
+    }
+    .field-input.error { border-color: var(--border-error); }
+    .field-hint {
+      font-size: 0.68rem; color: var(--text-error);
+      font-weight: 500; display: none;
+    }
+    .field-hint.visible { display: block; }
+
+    /* Password field with toggle */
+    .input-wrap { position: relative; }
+    .input-wrap .field-input { padding-right: 44px; }
+    .pw-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); display: flex; align-items: center;
+      transition: color 0.2s; padding: 4px;
+    }
+    .pw-toggle:hover { color: var(--text-secondary); }
+
+    .field-select {
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%234A4A4A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .field-select option { background: #1a1a1a; }
+
+    /* Section divider inside form */
+    .form-divider {
+      height: 1px; background: var(--border);
+      margin: 1.5rem 0;
+    }
+    .form-section-label {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 1rem;
+    }
+
+    /* ============================================
+       MARKETING CHANNELS
+    ============================================ */
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+    .channel-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .channel-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+    .channel-item input[type="checkbox"] { display: none; }
+    .channel-item.checked {
+      background: rgba(245,197,24,0.08);
+      border-color: rgba(245,197,24,0.35);
+    }
+    .channel-check {
+      width: 18px; height: 18px; border-radius: 5px;
+      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .channel-item.checked .channel-check {
+      background: var(--accent); border-color: var(--accent);
+    }
+    .channel-check-inner {
+      opacity: 0; transform: scale(0.5);
+      transition: all 0.2s var(--ease-spring);
+    }
+    .channel-item.checked .channel-check-inner { opacity: 1; transform: scale(1); }
+    .channel-name {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .channel-item.checked .channel-name { color: var(--text-primary); }
+
+    /* ============================================
+       TERMS ACCORDION
+    ============================================ */
+    .terms-accordion {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+    .terms-trigger {
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.03);
+      border: none; cursor: pointer;
+      font-family: var(--font);
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--text-secondary);
+      transition: background 0.2s, color 0.2s;
+      text-align: left;
+    }
+    .terms-trigger:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+    .terms-trigger.open { color: var(--text-primary); background: rgba(245,197,24,0.05); }
+    .terms-arrow {
+      width: 16px; height: 16px; flex-shrink: 0;
+      transition: transform 0.3s var(--ease-out);
+      color: var(--text-muted);
+    }
+    .terms-trigger.open .terms-arrow { transform: rotate(180deg); }
+    .terms-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s var(--ease-out), padding 0.3s;
+      background: rgba(0,0,0,0.2);
+    }
+    .terms-body.open { max-height: 260px; }
+    .terms-text {
+      padding: 1rem 1.25rem;
+      font-size: 0.78rem; font-weight: 400;
+      color: var(--text-muted); line-height: 1.75;
+    }
+    .terms-text a { color: var(--accent); text-decoration: none; }
+    .terms-text a:hover { color: var(--accent-light); }
+
+    .agree-row {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 1.25rem;
+    }
+    .agree-row:hover { background: rgba(255,255,255,0.05); }
+    .agree-row.checked { background: rgba(245,197,24,0.06); border-color: rgba(245,197,24,0.3); }
+    .agree-row input { display: none; }
+    .agree-box {
+      width: 20px; height: 20px; border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+      transition: all 0.2s;
+    }
+    .agree-row.checked .agree-box { background: var(--accent); border-color: var(--accent); }
+    .agree-mark {
+      opacity: 0; transform: scale(0.5);
+      transition: all 0.2s var(--ease-spring);
+    }
+    .agree-row.checked .agree-mark { opacity: 1; transform: scale(1); }
+    .agree-text {
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--text-secondary); line-height: 1.6;
+    }
+    .agree-text a { color: var(--accent); text-decoration: none; font-weight: 700; }
+    .agree-text a:hover { color: var(--accent-light); }
+
+    /* reCAPTCHA placeholder */
+    .recaptcha-wrap {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 0.5rem;
+    }
+    .recaptcha-check {
+      width: 24px; height: 24px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      background: rgba(255,255,255,0.04);
+      flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .recaptcha-check.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .recaptcha-check.checked::after {
+      content: '';
+      position: absolute;
+      left: 5px; top: 2px;
+      width: 10px; height: 6px;
+      border-left: 2px solid #0a0a0a;
+      border-bottom: 2px solid #0a0a0a;
+      transform: rotate(-45deg);
+    }
+    .recaptcha-label {
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--text-secondary); flex: 1;
+    }
+    .recaptcha-logo {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 2px;
+    }
+    .recaptcha-logo-icon {
+      font-size: 1.3rem; line-height: 1;
+    }
+    .recaptcha-logo-text {
+      font-size: 0.52rem; font-weight: 600;
+      color: var(--text-muted); letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ============================================
+       NAVIGATION BUTTONS
+    ============================================ */
+    .form-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 2.5rem;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.15);
+    }
+    .btn-back {
+      display: flex; align-items: center; gap: 7px;
+      padding: 11px 22px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-back:hover {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-primary);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .btn-next {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 28px;
+      border-radius: var(--radius-full);
+      border: none;
+      background: var(--accent);
+      color: #0a0a0a;
+      font-family: var(--font);
+      font-size: 0.9rem; font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(245,197,24,0.35);
+      transition: all 0.25s var(--ease-out);
+      letter-spacing: 0.01em;
+    }
+    .btn-next:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(245,197,24,0.5);
+    }
+    .btn-next:active { transform: translateY(0); }
+    .btn-next svg { transition: transform 0.2s; }
+    .btn-next:hover svg { transform: translateX(3px); }
+
+    .btn-submit {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 32px;
+      border-radius: var(--radius-full);
+      border: none;
+      background: var(--accent);
+      color: #0a0a0a;
+      font-family: var(--font);
+      font-size: 0.9rem; font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(245,197,24,0.35);
+      transition: all 0.25s var(--ease-out);
+    }
+    .btn-submit:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px rgba(245,197,24,0.55);
+    }
+
+    /* Step counter */
+    .step-counter {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--text-muted); letter-spacing: 0.05em;
+    }
+
+    /* ============================================
+       SUCCESS SCREEN
+    ============================================ */
+    .success-screen {
+      display: none;
+      width: 100%; max-width: 680px;
+      text-align: center;
+      padding: 2rem;
+      animation: fadeIn 0.6s var(--ease-out) both;
+    }
+    .success-screen.visible { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-circle {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(245,197,24,0.1);
+      border: 2px solid rgba(245,197,24,0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 2rem;
+      position: relative;
+      animation: successPop 0.6s 0.2s var(--ease-spring) both;
+    }
+    @keyframes successPop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .success-circle::before {
+      content: '';
+      position: absolute; inset: -8px;
+      border-radius: 50%;
+      border: 1px solid rgba(245,197,24,0.15);
+    }
+    .check-svg {
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      animation: drawCheck 0.5s 0.7s ease-out forwards;
+    }
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .success-title {
+      font-size: 2rem; font-weight: 900;
+      letter-spacing: -0.04em; line-height: 1.1;
+      margin-bottom: 0.75rem;
+    }
+    .success-sub {
+      font-size: 0.95rem; font-weight: 400;
+      color: var(--text-secondary); line-height: 1.7;
+      max-width: 420px; margin: 0 auto 2.5rem;
+    }
+    .success-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .btn-home {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: var(--radius-full);
+      background: var(--accent); color: #0a0a0a;
+      font-family: var(--font); font-size: 0.9rem; font-weight: 800;
+      text-decoration: none; cursor: pointer; border: none;
+      box-shadow: 0 4px 20px rgba(245,197,24,0.35);
+      transition: all 0.25s var(--ease-out);
+    }
+    .btn-home:hover { background: var(--accent-light); transform: translateY(-1px); }
+    .btn-home-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: var(--radius-full);
+      background: transparent; color: var(--text-secondary);
+      font-family: var(--font); font-size: 0.9rem; font-weight: 600;
+      text-decoration: none; border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .btn-home-outline:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+
+    .success-confetti {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 999;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ============================================
+       RESPONSIVE
+    ============================================ */
+    @media (max-width: 640px) {
+      .step-panel { padding: 1.75rem 1.25rem; }
+      .form-nav { padding: 1.25rem; }
+      .col-2, .col-3 { grid-template-columns: 1fr; }
+      .field.span-2 { grid-column: span 1; }
+      .channels-grid { grid-template-columns: 1fr; }
+      .step-name { display: none; }
+      .step-bubble { width: 28px; height: 28px; font-size: 0.65rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================
+     NAVBAR
+============================================ -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="logo">
+      <img src="logo.png" alt="EPCVIP" />
+    </a>
+    <a href="index.html" class="nav-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to site
+    </a>
+  </div>
+</nav>
+
+<!-- ============================================
+     CONFETTI CONTAINER
+============================================ -->
+<div class="success-confetti" id="confetti"></div>
+
+<!-- ============================================
+     PAGE
+============================================ -->
+<div class="page">
+
+  <!-- ─── PROGRESS ─────────────────────────── -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="step-labels" id="stepLabels">
+      <div class="step-label active" data-step="1">
+        <div class="step-bubble"><span class="step-num">1</span></div>
+        <span class="step-name">Company</span>
+      </div>
+      <div class="step-label" data-step="2">
+        <div class="step-bubble"><span class="step-num">2</span></div>
+        <span class="step-name">Contact</span>
+      </div>
+      <div class="step-label" data-step="3">
+        <div class="step-bubble"><span class="step-num">3</span></div>
+        <span class="step-name">Address</span>
+      </div>
+      <div class="step-label" data-step="4">
+        <div class="step-bubble"><span class="step-num">4</span></div>
+        <span class="step-name">Presence</span>
+      </div>
+      <div class="step-label" data-step="5">
+        <div class="step-bubble"><span class="step-num">5</span></div>
+        <span class="step-name">Finish</span>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+    </div>
+  </div>
+
+  <!-- ─── FORM CARD ─────────────────────────── -->
+  <div class="form-card" id="formCard">
+    <div class="steps-container">
+
+      <!-- ======================================
+           STEP 1 — Company Info
+      ====================================== -->
+      <div class="step-panel active enter-right" id="step-1">
+        <div class="step-header">
+          <div class="step-tag">Step 1 of 5</div>
+          <div class="step-title">Tell us about your <span>company</span></div>
+          <div class="step-subtitle">We'll use this to set up your EPCVIP account and match you with the right network opportunities.</div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field span-2">
+            <label class="field-label">Company Name <span class="req">*</span></label>
+            <input class="field-input" type="text" id="companyName" placeholder="Acme Financial LLC" />
+            <span class="field-hint" id="companyName-hint">Company name is required</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Website</label>
+            <input class="field-input" type="url" id="website" placeholder="https://yoursite.com" />
+          </div>
+          <div class="field">
+            <label class="field-label">EIN / VAT Number</label>
+            <input class="field-input" type="text" id="einVat" placeholder="12-3456789" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================
+           STEP 2 — Primary Contact
+      ====================================== -->
+      <div class="step-panel" id="step-2">
+        <div class="step-header">
+          <div class="step-tag">Step 2 of 5</div>
+          <div class="step-title">Primary <span>contact info</span></div>
+          <div class="step-subtitle">This person will be the main point of contact for your account.</div>
+        </div>
+
+        <div class="field-grid col-2">
+          <div class="field">
+            <label class="field-label">First Name <span class="req">*</span></label>
+            <input class="field-input" type="text" id="firstName" placeholder="Jane" />
+            <span class="field-hint" id="firstName-hint">First name is required</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Last Name <span class="req">*</span></label>
+            <input class="field-input" type="text" id="lastName" placeholder="Smith" />
+            <span class="field-hint" id="lastName-hint">Last name is required</span>
+          </div>
+          <div class="field span-2">
+            <label class="field-label">Email Address <span class="req">*</span></label>
+            <input class="field-input" type="email" id="email" placeholder="jane@company.com" />
+            <span class="field-hint" id="email-hint">A valid email is required</span>
+          </div>
+          <div class="field span-2">
+            <label class="field-label">Primary Phone Number <span class="req">*</span></label>
+            <input class="field-input" type="tel" id="phone" placeholder="+1 (555) 000-0000" />
+            <span class="field-hint" id="phone-hint">Phone number is required</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Password <span class="req">*</span></label>
+            <div class="input-wrap">
+              <input class="field-input" type="password" id="password" placeholder="Min. 8 characters" />
+              <button class="pw-toggle" type="button" onclick="togglePw('password', this)" tabindex="-1">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" id="eye-password">
+                  <path d="M1.5 9C1.5 9 4 3.5 9 3.5C14 3.5 16.5 9 16.5 9C16.5 9 14 14.5 9 14.5C4 14.5 1.5 9 1.5 9Z" stroke="currentColor" stroke-width="1.3"/>
+                  <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+                </svg>
+              </button>
+            </div>
+            <span class="field-hint" id="password-hint">Password must be at least 8 characters</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Confirm Password <span class="req">*</span></label>
+            <div class="input-wrap">
+              <input class="field-input" type="password" id="confirmPassword" placeholder="Re-enter password" />
+              <button class="pw-toggle" type="button" onclick="togglePw('confirmPassword', this)" tabindex="-1">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M1.5 9C1.5 9 4 3.5 9 3.5C14 3.5 16.5 9 16.5 9C16.5 9 14 14.5 9 14.5C4 14.5 1.5 9 1.5 9Z" stroke="currentColor" stroke-width="1.3"/>
+                  <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+                </svg>
+              </button>
+            </div>
+            <span class="field-hint" id="confirmPassword-hint">Passwords do not match</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================
+           STEP 3 — Address
+      ====================================== -->
+      <div class="step-panel" id="step-3">
+        <div class="step-header">
+          <div class="step-tag">Step 3 of 5</div>
+          <div class="step-title">Your business <span>address</span></div>
+          <div class="step-subtitle">Required for verification and payment processing.</div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field span-2">
+            <label class="field-label">Address Line 1 <span class="req">*</span></label>
+            <input class="field-input" type="text" id="address1" placeholder="123 Main Street" />
+            <span class="field-hint" id="address1-hint">Address is required</span>
+          </div>
+          <div class="field span-2">
+            <label class="field-label">Address Line 2</label>
+            <input class="field-input" type="text" id="address2" placeholder="Suite 400" />
+          </div>
+          <div class="field">
+            <label class="field-label">City <span class="req">*</span></label>
+            <input class="field-input" type="text" id="city" placeholder="New York" />
+            <span class="field-hint" id="city-hint">City is required</span>
+          </div>
+          <div class="field">
+            <label class="field-label">State / Province <span class="req">*</span></label>
+            <input class="field-input" type="text" id="state" placeholder="NY" />
+            <span class="field-hint" id="state-hint">State is required</span>
+          </div>
+          <div class="field">
+            <label class="field-label">ZIP / Postal Code <span class="req">*</span></label>
+            <input class="field-input" type="text" id="zip" placeholder="10001" />
+            <span class="field-hint" id="zip-hint">ZIP code is required</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Country <span class="req">*</span></label>
+            <select class="field-select" id="country">
+              <option value="" disabled selected>Select country</option>
+              <option>United States</option>
+              <option>Canada</option>
+              <option>United Kingdom</option>
+              <option>Australia</option>
+              <option>Germany</option>
+              <option>France</option>
+              <option>Netherlands</option>
+              <option>Other</option>
+            </select>
+            <span class="field-hint" id="country-hint">Country is required</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================
+           STEP 4 — Online Presence
+      ====================================== -->
+      <div class="step-panel" id="step-4">
+        <div class="step-header">
+          <div class="step-tag">Step 4 of 5</div>
+          <div class="step-title">Online <span>presence</span></div>
+          <div class="step-subtitle">Help your account manager reach you on your preferred channels. All fields optional.</div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field span-2">
+            <label class="field-label">LinkedIn Profile URL</label>
+            <input class="field-input" type="url" id="linkedin" placeholder="https://linkedin.com/in/yourprofile" />
+          </div>
+          <div class="field">
+            <label class="field-label">Microsoft Teams Handle</label>
+            <input class="field-input" type="text" id="teams" placeholder="jane@company.com" />
+          </div>
+          <div class="field">
+            <label class="field-label">Telegram Handle</label>
+            <input class="field-input" type="text" id="telegram" placeholder="@yourhandle" />
+          </div>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-section-label">Marketing Channels You Use</div>
+        <div class="channels-grid" id="channelsGrid">
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="search" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">Search (SEO / SEM)</span>
+          </div>
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="social" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">Social Media</span>
+          </div>
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="email" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">Email Marketing</span>
+          </div>
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="display" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">Display Advertising</span>
+          </div>
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="native" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">Native Advertising</span>
+          </div>
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="content" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">Content Marketing</span>
+          </div>
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="affiliate" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">Affiliate Marketing</span>
+          </div>
+          <div class="channel-item" onclick="toggleChannel(this)">
+            <input type="checkbox" value="sms" />
+            <div class="channel-check">
+              <svg class="channel-check-inner" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="channel-name">SMS Marketing</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================
+           STEP 5 — Terms & Submit
+      ====================================== -->
+      <div class="step-panel" id="step-5">
+        <div class="step-header">
+          <div class="step-tag">Step 5 of 5</div>
+          <div class="step-title">Almost there — <span>agree & finish</span></div>
+          <div class="step-subtitle">Review and accept our terms to complete your registration.</div>
+        </div>
+
+        <!-- Terms accordion -->
+        <div class="terms-accordion">
+          <button class="terms-trigger" id="termsTrigger" onclick="toggleTerms()" type="button">
+            <span>Terms &amp; Conditions</span>
+            <svg class="terms-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="terms-body" id="termsBody">
+            <div class="terms-text">
+              By registering with EPCVIP you agree to comply with all applicable laws and regulations, including the Telephone Consumer Protection Act (TCPA) and CAN-SPAM Act. You agree that all traffic you send must be compliant with our <a href="#">Publisher Guidelines</a> and that you will not use deceptive, fraudulent, or prohibited methods. EPCVIP reserves the right to suspend or terminate accounts that violate these terms. Revenue share and payment terms are governed by the separate <a href="#">Advertiser/Publisher Agreement</a> executed upon account activation. EPCVIP's <a href="#">Privacy Policy</a> governs the collection and use of personal data submitted through this form. All disputes are subject to binding arbitration in the jurisdiction of Florida, USA. For the full Terms &amp; Conditions, visit <a href="#">epcvip.com/terms</a>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Marketing agreement accordion -->
+        <div class="terms-accordion" style="margin-bottom: 1.25rem;">
+          <button class="terms-trigger" id="mktTrigger" onclick="toggleMkt()" type="button">
+            <span>Marketing Communication Agreement</span>
+            <svg class="terms-arrow" viewBox="0 0 16 16" fill="none">
+              <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="terms-body" id="mktBody">
+            <div class="terms-text">
+              By checking the box below, you consent to receive marketing communications from EPCVIP including network updates, promotional offers, campaign performance reports, and product announcements via email, SMS, and the communication channels you selected. You may opt out at any time by contacting <a href="#">support@epcvip.com</a> or clicking unsubscribe in any email. Standard messaging rates may apply for SMS.
+            </div>
+          </div>
+        </div>
+
+        <!-- Agree checkbox -->
+        <div class="agree-row" id="agreeRow" onclick="toggleAgree()">
+          <input type="checkbox" id="agreeCheck" />
+          <div class="agree-box">
+            <svg class="agree-mark" width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="#0a0a0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="agree-text">
+            I have read and agree to the <a href="#" onclick="toggleTerms();return false;">Terms &amp; Conditions</a> and <a href="#" onclick="toggleMkt();return false;">Marketing Agreement</a>. I confirm all information provided is accurate.
+          </span>
+        </div>
+
+        <!-- reCAPTCHA placeholder -->
+        <div class="recaptcha-wrap">
+          <div class="recaptcha-check" id="recaptchaCheck" onclick="toggleRecaptcha()"></div>
+          <span class="recaptcha-label">I'm not a robot</span>
+          <div class="recaptcha-logo">
+            <div class="recaptcha-logo-icon">🔒</div>
+            <div class="recaptcha-logo-text">reCAPTCHA</div>
+          </div>
+        </div>
+        <div style="font-size:0.68rem; color:var(--text-muted); margin-bottom:0.5rem; padding: 0 2px;">
+          Replace the placeholder above with your actual Google reCAPTCHA widget using your site key.
+        </div>
+      </div>
+
+    </div><!-- /steps-container -->
+
+    <!-- ─── FORM NAVIGATION ─────────────────── -->
+    <div class="form-nav" id="formNav">
+      <button class="btn-back" id="btnBack" onclick="prevStep()" disabled>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </button>
+      <span class="step-counter" id="stepCounter">Step 1 of 5</span>
+      <button class="btn-next" id="btnNext" onclick="nextStep()">
+        Continue
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div><!-- /form-card -->
+
+  <!-- ─── SUCCESS SCREEN ─────────────────────── -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-circle">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <path class="check-svg" d="M10 22L18 30L34 14" stroke="#F5C518" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2 class="success-title">You're all set<br><span style="background:linear-gradient(135deg,#F5C518,#FFE066,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Welcome to EPCVIP</span></h2>
+    <p class="success-sub">Your application has been submitted. Our team reviews applications within 24 hours — we'll email you as soon as your account is approved.</p>
+    <div class="success-actions">
+      <a href="index.html" class="btn-home">Back to Home</a>
+      <a href="index2.html" class="btn-home-outline">View Design 2</a>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ============================================
+     JAVASCRIPT
+============================================ -->
+<script>
+  const TOTAL_STEPS = 5;
+  let current = 1;
+
+  // ─── Step navigation ─────────────────────────
+  function goToStep(next, direction) {
+    const currentPanel = document.getElementById(`step-${current}`);
+    const nextPanel    = document.getElementById(`step-${next}`);
+
+    // Animate out current (instant hide + animate in next)
+    currentPanel.classList.remove('active', 'enter-right', 'enter-left');
+    currentPanel.style.display = 'none';
+
+    nextPanel.classList.remove('enter-right', 'enter-left');
+    nextPanel.style.display = 'block';
+    // Force reflow
+    nextPanel.offsetHeight;
+    nextPanel.classList.add('active', direction === 'forward' ? 'enter-right' : 'enter-left');
+
+    current = next;
+    updateUI();
+  }
+
+  function nextStep() {
+    if (!validateStep(current)) return;
+    if (current === TOTAL_STEPS) { submitForm(); return; }
+    goToStep(current + 1, 'forward');
+  }
+
+  function prevStep() {
+    if (current === 1) return;
+    goToStep(current - 1, 'back');
+  }
+
+  function updateUI() {
+    // Progress fill
+    const pct = ((current - 1) / TOTAL_STEPS) * 100 + (100 / TOTAL_STEPS) * 0.5;
+    document.getElementById('progressFill').style.width = Math.min(pct, 95) + '%';
+
+    // Step labels
+    document.querySelectorAll('.step-label').forEach(el => {
+      const s = parseInt(el.dataset.step);
+      el.classList.remove('active', 'done');
+      if (s === current) el.classList.add('active');
+      else if (s < current) el.classList.add('done');
+    });
+
+    // Counter
+    document.getElementById('stepCounter').textContent = `Step ${current} of ${TOTAL_STEPS}`;
+
+    // Back button
+    document.getElementById('btnBack').disabled = current === 1;
+
+    // Next button label
+    const btnNext = document.getElementById('btnNext');
+    if (current === TOTAL_STEPS) {
+      btnNext.innerHTML = `
+        Finish Registration
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+    } else {
+      btnNext.innerHTML = `
+        Continue
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+    }
+  }
+
+  // ─── Validation ──────────────────────────────
+  function validateStep(step) {
+    let valid = true;
+
+    const rules = {
+      1: [{ id: 'companyName', msg: 'Company name is required' }],
+      2: [
+        { id: 'firstName',       msg: 'First name is required' },
+        { id: 'lastName',        msg: 'Last name is required' },
+        { id: 'email',           msg: 'A valid email is required', fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+        { id: 'phone',           msg: 'Phone number is required' },
+        { id: 'password',        msg: 'Password must be at least 8 characters', fn: v => v.length >= 8 },
+        { id: 'confirmPassword', msg: 'Passwords do not match', fn: v => v === document.getElementById('password').value },
+      ],
+      3: [
+        { id: 'address1', msg: 'Address is required' },
+        { id: 'city',     msg: 'City is required' },
+        { id: 'state',    msg: 'State is required' },
+        { id: 'zip',      msg: 'ZIP code is required' },
+        { id: 'country',  msg: 'Country is required' },
+      ],
+      4: [],
+      5: [],
+    };
+
+    (rules[step] || []).forEach(rule => {
+      const el   = document.getElementById(rule.id);
+      const hint = document.getElementById(rule.id + '-hint');
+      const val  = el.value.trim();
+      const ok   = rule.fn ? rule.fn(val) : val.length > 0;
+
+      if (!ok) {
+        el.classList.add('error');
+        if (hint) { hint.textContent = rule.msg; hint.classList.add('visible'); }
+        valid = false;
+      } else {
+        el.classList.remove('error');
+        if (hint) hint.classList.remove('visible');
+      }
+    });
+
+    // Step 5 extra checks
+    if (step === 5) {
+      const agreed = document.getElementById('agreeRow').classList.contains('checked');
+      const captcha = document.getElementById('recaptchaCheck').classList.contains('checked');
+      if (!agreed) {
+        showToast('Please agree to the Terms & Conditions to continue.');
+        valid = false;
+      } else if (!captcha) {
+        showToast('Please complete the reCAPTCHA verification.');
+        valid = false;
+      }
+    }
+
+    // Scroll to first error
+    if (!valid) {
+      const firstError = document.querySelector('.field-input.error, .field-select.error');
+      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    return valid;
+  }
+
+  // Live validation clear on input
+  document.querySelectorAll('.field-input, .field-select').forEach(el => {
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      const hint = document.getElementById(el.id + '-hint');
+      if (hint) hint.classList.remove('visible');
+    });
+  });
+
+  // ─── Submit ──────────────────────────────────
+  function submitForm() {
+    // Hide form
+    document.getElementById('formCard').style.animation = 'fadeOut 0.4s ease-out forwards';
+    document.getElementById('formCard').style.animationFillMode = 'forwards';
+    setTimeout(() => {
+      document.getElementById('formCard').style.display = 'none';
+      document.getElementById('progressWrap').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+      document.getElementById('progressFill').style.width = '100%';
+      launchConfetti();
+    }, 400);
+  }
+
+  // ─── Confetti ────────────────────────────────
+  function launchConfetti() {
+    const colors = ['#F5C518', '#FFE066', '#C9A012', '#ffffff', '#888888'];
+    const container = document.getElementById('confetti');
+    for (let i = 0; i < 80; i++) {
+      setTimeout(() => {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.cssText = `
+          left: ${Math.random() * 100}%;
+          background: ${colors[Math.floor(Math.random() * colors.length)]};
+          width: ${6 + Math.random() * 8}px;
+          height: ${6 + Math.random() * 8}px;
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+          animation-duration: ${1.5 + Math.random() * 2}s;
+          animation-delay: ${Math.random() * 0.5}s;
+        `;
+        container.appendChild(piece);
+        setTimeout(() => piece.remove(), 3500);
+      }, i * 18);
+    }
+  }
+
+  // ─── Password toggle ─────────────────────────
+  function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.style.opacity = input.type === 'text' ? '1' : '0.5';
+  }
+
+  // ─── Channel checkboxes ──────────────────────
+  function toggleChannel(el) {
+    el.classList.toggle('checked');
+    el.querySelector('input').checked = el.classList.contains('checked');
+  }
+
+  // ─── Terms accordion ─────────────────────────
+  function toggleTerms() {
+    const trigger = document.getElementById('termsTrigger');
+    const body    = document.getElementById('termsBody');
+    trigger.classList.toggle('open');
+    body.classList.toggle('open');
+  }
+  function toggleMkt() {
+    const trigger = document.getElementById('mktTrigger');
+    const body    = document.getElementById('mktBody');
+    trigger.classList.toggle('open');
+    body.classList.toggle('open');
+  }
+
+  // ─── Agree checkbox ──────────────────────────
+  function toggleAgree() {
+    const row = document.getElementById('agreeRow');
+    row.classList.toggle('checked');
+    document.getElementById('agreeCheck').checked = row.classList.contains('checked');
+  }
+
+  // ─── reCAPTCHA placeholder ───────────────────
+  function toggleRecaptcha() {
+    document.getElementById('recaptchaCheck').classList.toggle('checked');
+  }
+
+  // ─── Toast ───────────────────────────────────
+  function showToast(msg) {
+    const existing = document.getElementById('toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = `
+      position:fixed; bottom:2rem; left:50%; transform:translateX(-50%);
+      background:#1a1a1a; border:1px solid rgba(239,68,68,0.4);
+      color:#ef4444; font-family:var(--font); font-size:0.82rem; font-weight:600;
+      padding:12px 20px; border-radius:999px; z-index:999;
+      box-shadow:0 8px 30px rgba(0,0,0,0.5);
+      animation:fadeIn 0.3s ease-out;
+    `;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // Add fadeOut keyframe dynamically
+  const style = document.createElement('style');
+  style.textContent = '@keyframes fadeOut { to { opacity:0; transform:translateY(10px); } }';
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
