@@ -1862,20 +1862,20 @@
       <div class="footer-col">
         <h5>Legal</h5>
         <ul>
-          <li><a href="#">Terms &amp; Conditions</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Security</a></li>
-          <li><a href="#">CCPA Request</a></li>
-          <li><a href="#">Responsible Disclosure</a></li>
+          <li><a href="#" onclick="openLegalModal('terms');return false;">Terms &amp; Conditions</a></li>
+          <li><a href="#" onclick="openLegalModal('privacy');return false;">Privacy Policy</a></li>
+          <li><a href="#" onclick="openLegalModal('security');return false;">Security</a></li>
+          <li><a href="#" onclick="openLegalModal('ccpa');return false;">CCPA Request</a></li>
+          <li><a href="#" onclick="openLegalModal('disclosure');return false;">Responsible Disclosure</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
       <div class="footer-copy">© 2026 EPCVIP. All rights reserved.</div>
       <div class="footer-legal">
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Security</a>
+        <a href="#" onclick="openLegalModal('privacy');return false;">Privacy</a>
+        <a href="#" onclick="openLegalModal('terms');return false;">Terms</a>
+        <a href="#" onclick="openLegalModal('security');return false;">Security</a>
       </div>
     </div>
   </div>
@@ -2056,6 +2056,7 @@
   });
 </script>
 <script src="js/signup-modal.js"></script>
+<script src="js/legal-modal.js"></script>
 
 <!-- ═══ EPCVIP Chat Widget ═══ -->
 <style id="epcvip-chat-styles">
