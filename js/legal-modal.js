@@ -229,7 +229,7 @@
                 '<div class="lm-fg"><label class="lm-label" for="lmCcpaLast">Last Name <span>*</span></label><input class="lm-input" id="lmCcpaLast" type="text" placeholder="Smith" required /></div>' +
               '</div>' +
               '<div class="lm-fg"><label class="lm-label" for="lmCcpaEmail">Email Address <span>*</span></label><input class="lm-input" id="lmCcpaEmail" type="email" placeholder="jane@example.com" required /></div>' +
-              '<div class="lm-fg"><label class="lm-label" for="lmCcpaPhone">Phone Number <span>*</span></label><input class="lm-input" id="lmCcpaPhone" type="tel" placeholder="(555) 000-0000" required /></div>' +
+              '<div class="lm-fg"><label class="lm-label" for="lmCcpaPhone">Phone Number <span>*</span></label><input class="lm-input" id="lmCcpaPhone" type="tel" placeholder="000-000-0000" maxlength="12" required /></div>' +
               '<div class="lm-fg"><label class="lm-label" for="lmCcpaAddress">Home Address <span>*</span></label><input class="lm-input" id="lmCcpaAddress" type="text" placeholder="123 Main Street" required /></div>' +
               '<div class="lm-grid2">' +
                 '<div class="lm-fg"><label class="lm-label" for="lmCcpaPostal">Postal Code <span>*</span></label><input class="lm-input" id="lmCcpaPostal" type="text" placeholder="90001" required /></div>' +

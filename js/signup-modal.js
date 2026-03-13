@@ -519,7 +519,7 @@
               </div>
               <div class="sm-field span-2">
                 <label class="sm-field-label">Phone Number <span class="req">*</span></label>
-                <input class="sm-input" type="tel" id="sm-phone" placeholder="+1 (555) 000-0000" />
+                <input class="sm-input" type="tel" id="sm-phone" placeholder="000-000-0000" maxlength="12" />
                 <span class="sm-hint" id="sm-phone-hint">Phone number is required</span>
               </div>
               <div class="sm-field">
